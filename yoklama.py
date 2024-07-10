@@ -3,39 +3,33 @@ from simple_facerec import SimpleFacerec
 from datetime import datetime
 
 def yoklamayaYaz(name):
-    with open('yoklama.csv','r+') as f:
+    with open('yoklama.csv', 'r+') as f:
         myDataList = f.readlines()
-        nameList = []
-        for line in myDataList:
-            entry = line.split(',')
-            nameList.append(entry[0])
+        nameList = [entry.split(',')[0] for entry in myDataList]
 
         if name not in nameList:
             now = datetime.now()
             dtString = now.strftime('%H:%M:%S')
             f.writelines(f'\n{name},{dtString}')
 
-img_dizi = ["DiCaprio","Elon Musk","Jeff Bezos","Kivanc Tatlitug","Messi","Esra Bilgic","Tom Cruise"]
-
-# Bir klasörden yüzleri kodlayın
+# SimpleFacerec sınıfından bir örnek oluşturun
 sfr = SimpleFacerec()
-for name in img_dizi:
-    folder_path = f"images/{name}/" # Her ismin klasör yolunu oluşturduk.
-    sfr.load_encoding_images(folder_path)
+
+sfr.load_encoding_images("images/")  # Buradaki "images/" kısmını kendi klasör yapınıza göre ayarlayın
+
 # Kamerayı Yükle
 cap = cv2.VideoCapture(0)
-
 
 while True:
     ret, frame = cap.read()
 
     # Yüzleri Algıla
-
     face_locations, face_names = sfr.detect_known_faces(frame)
+
     for face_loc, name in zip(face_locations, face_names):
         y1, x2, y2, x1 = face_loc[0], face_loc[1], face_loc[2], face_loc[3]
 
-        cv2.putText(frame, name,(x1, y1 - 10), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
+        cv2.putText(frame, name, (x1, y1 - 10), cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 200), 2)
         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 200), 4)
 
         yoklamayaYaz(name)
